@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shakkiturnaus</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #1a1710;
+  --paper: #f5f0e8;
+  --cream: #ede8db;
+  --tan: #d4cbb8;
+  --brown: #8b7355;
+  --gold: #b8962e;
+  --red: #8b2020;
+  --green: #1a5c2e;
+  --blue: #1a3a5c;
+  --muted: #6b6355;
+  --border: #c4bba8;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+#app { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+
+header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  font-family: 'Crimson Pro', serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.logo-sub {
+  font-size: 10px;
+  opacity: 0.5;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 300;
+}
+
+nav { display: flex; gap: 2px; margin-left: auto; }
+
+.tab {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--paper); border-color: rgba(255,255,255,0.4); }
+.tab.active { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 500; }
+
+main { display: grid; grid-template-columns: 260px 1fr; }
+
+aside {
+  background: var(--cream);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.content {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* ── PANELS ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── SIDEBAR ── */
+.s-section { margin-bottom: 4px; }
+.s-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.s-field { margin-bottom: 8px; }
+.s-field label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 3px; letter-spacing: 0.5px; }
+.s-field input, .s-field select {
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 5px 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.s-field input:focus, .s-field select:focus { border-color: var(--gold); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--brown); border-color: var(--brown); }
+.btn.btn-sm { padding: 4px 8px; font-size: 10px; }
+.btn.btn-ghost { background: transparent; color: var(--ink); }
+.btn.btn-ghost:hover { background: var(--tan); }
+.btn.btn-gold { background: var(--gold); border-color: var(--gold); color: white; }
+.btn.btn-gold:hover { background: #9a7e25; border-color: #9a7e25; }
+.btn.btn-red { background: var(--red); border-color: var(--red); color: white; }
+.btn.btn-red:hover { background: #6b1818; border-color: #6b1818; }
+.btn.btn-green { background: var(--green); border-color: var(--green); color: white; }
+.btn.btn-green:hover { background: #134822; border-color: #134822; }
+.btn-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+hr { border: none; border-top: 1px solid var(--border); }
+
+/* ── TABLES ── */
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 8px;
+  font-weight: 400;
+}
+tbody td { padding: 7px 8px; border-bottom: 1px solid rgba(196,187,168,0.4); }
+tbody tr:hover td { background: rgba(184,150,46,0.05); }
+tbody tr:last-child td { border-bottom: none; }
+
+.td-num { color: var(--muted); font-size: 11px; width: 30px; }
+.td-name { font-family: 'Crimson Pro', serif; font-size: 15px; font-weight: 600; }
+.td-rating { color: var(--gold); font-weight: 500; }
+.td-score { font-weight: 500; font-size: 14px; }
+.td-muted { color: var(--muted); font-size: 11px; }
+
+/* ── PAIRING ROWS ── */
+.pairing-board {
+  background: white;
+  border: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.pairing-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 60px 1fr 140px;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(196,187,168,0.3);
+}
+.pairing-row:last-child { border-bottom: none; }
+.board-n { color: var(--muted); font-size: 11px; text-align: center; }
+.player-cell { display: flex; align-items: center; gap: 6px; }
+.player-cell.right { justify-content: flex-end; text-align: right; }
+.player-name { font-family: 'Crimson Pro', serif; font-size: 15px; font-weight: 600; }
+.player-rtg { font-size: 11px; color: var(--muted); }
+.color-pip {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.color-pip.white-pip { background: #fff; border-color: var(--tan); }
+.color-pip.black-pip { background: var(--ink); }
+
+.vs-cell { text-align: center; font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+.result-btns { display: flex; gap: 3px; justify-content: flex-end; }
+.rbtn {
+  padding: 3px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: 0.5px;
+}
+.rbtn:hover { border-color: var(--ink); color: var(--ink); }
+.rbtn.sel-w { background: var(--green); border-color: var(--green); color: white; font-weight: 500; }
+.rbtn.sel-d { background: var(--gold); border-color: var(--gold); color: white; font-weight: 500; }
+.rbtn.sel-l { background: var(--red); border-color: var(--red); color: white; font-weight: 500; }
+
+.bye-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(184,150,46,0.06);
+  border-bottom: 1px solid rgba(196,187,168,0.3);
+}
+.bye-tag {
+  padding: 1px 6px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+/* ── ROUND TABS ── */
+.round-tabs { display: flex; gap: 2px; margin-bottom: 16px; flex-wrap: wrap; }
+.rtab {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  background: white;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.12s;
+}
+.rtab:hover { border-color: var(--ink); color: var(--ink); }
+.rtab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ── MESSAGES ── */
+.msg {
+  padding: 8px 12px;
+  border-left: 3px solid var(--gold);
+  background: rgba(184,150,46,0.06);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.msg.err { border-color: var(--red); background: rgba(139,32,32,0.05); color: var(--red); }
+.msg.ok { border-color: var(--green); background: rgba(26,92,46,0.05); color: var(--green); }
+
+/* ── STANDINGS HISTORY ── */
+.hist { display: flex; gap: 2px; }
+.hc {
+  width: 16px; height: 16px; line-height: 16px; text-align: center;
+  font-size: 10px; font-weight: 500;
+}
+.hc.W { background: var(--green); color: white; }
+.hc.D { background: var(--gold); color: white; }
+.hc.L { background: var(--red); color: white; }
+.hc.B { background: var(--blue); color: white; }
+.hc.u { background: var(--tan); color: var(--muted); }
+
+/* ── CROSS TABLE ── */
+.cross-wrap { overflow-x: auto; }
+.cross-wrap table th, .cross-wrap table td { text-align: center; min-width: 28px; }
+.cross-wrap table th:nth-child(2), .cross-wrap table td:nth-child(2) { text-align: left; min-width: 140px; }
+.self-cell { background: var(--cream); }
+.cr-w { color: var(--green); font-weight: 600; }
+.cr-d { color: var(--gold); }
+.cr-l { color: var(--red); }
+
+/* ── PLAYER IMPORT ── */
+textarea {
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 8px;
+  resize: vertical;
+  min-height: 160px;
+  outline: none;
+}
+textarea:focus { border-color: var(--gold); }
+
+.hint { font-size: 10px; color: var(--muted); line-height: 1.8; margin-top: 6px; }
+.hint code { background: var(--tan); padding: 0 3px; }
+
+/* ── GROUP HEADERS ── */
+.group-hdr {
+  padding: 6px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-top: 12px;
+  margin-bottom: 2px;
+}
+.group-hdr:first-child { margin-top: 0; }
+.group-badge {
+  display: inline-block;
+  width: 20px; height: 20px; line-height: 20px;
+  text-align: center;
+  background: var(--gold);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+.group-input {
+  width: 40px !important;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 2px 4px !important;
+  font-size: 11px !important;
+}
+
+/* ── PAGE HEADER ── */
+.page-hdr {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}
+.page-hdr h2 {
+  font-family: 'Crimson Pro', serif;
+  font-size: 24px;
+  font-weight: 600;
+}
+.page-hdr .sub { font-size: 11px; color: var(--muted); }
+
+/* ── STAT BAR ── */
+.stat-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  background: white;
+}
+.stat-item {
+  flex: 1;
+  padding: 10px 14px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.stat-item:last-child { border-right: none; }
+.stat-v { font-size: 20px; font-family: 'Crimson Pro', serif; font-weight: 600; color: var(--gold); }
+.stat-l { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+
+/* ── MODAL ── */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 999;
+  align-items: center; justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  padding: 24px;
+  max-width: 420px;
+  width: calc(100% - 32px);
+}
+.modal h3 { font-family: 'Crimson Pro', serif; font-size: 18px; margin-bottom: 8px; }
+.modal p { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div>
+    <div class="logo">♟ Shakkiturnaus</div>
+    <div class="logo-sub">Swiss-järjestelmä</div>
+  </div>
+  <nav>
+    <button class="tab active" data-page="pairings">Paritukset</button>
+    <button class="tab" data-page="standings">Sijoitukset</button>
+    <button class="tab" data-page="cross">Kohtaamiset</button>
+    <button class="tab" data-page="players">Pelaajat</button>
+    <button class="tab" data-page="settings">Asetukset</button>
+  </nav>
+</header>
+
+<main>
+<!-- ── SIDEBAR ── -->
+<aside>
+  <div class="s-section">
+    <div class="s-label">Turnaus</div>
+    <div class="s-field">
+      <label>Nimi</label>
+      <input id="cfg-name" type="text" value="Shakkiturnaus">
+    </div>
+    <div class="s-field">
+      <label>Kierroksia</label>
+      <input id="cfg-rounds" type="number" value="7" min="1" max="30">
+    </div>
+    <div class="s-field">
+      <label>Bye-pisteet</label>
+      <select id="cfg-bye">
+        <option value="1">1 piste</option>
+        <option value="0.5" selected>½ pistettä</option>
+        <option value="0">0 pistettä</option>
+      </select>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="s-section">
+    <div class="s-label">Kierros</div>
+    <div id="sidebar-round-info" style="font-size:11px;color:var(--muted);margin-bottom:8px">Ei aloitettu</div>
+    <button class="btn btn-green" id="btn-new-round" style="width:100%">▶ Luo paritukset</button>
+    <div id="btn-delete-round-wrap" style="margin-top:4px;display:none">
+      <button class="btn btn-ghost btn-sm" id="btn-delete-round" style="width:100%">✕ Poista viimeinen kierros</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="s-section">
+    <div class="s-label">Varmuuskopio</div>
+    <div class="btn-row">
+      <button class="btn btn-gold btn-sm" id="btn-save">💾 Tallenna</button>
+      <button class="btn btn-ghost btn-sm" id="btn-load">📂 Lataa</button>
+    </div>
+    <input type="file" id="file-input" accept=".json" style="display:none">
+  </div>
+
+  <hr>
+
+  <div class="s-section">
+    <button class="btn btn-red btn-sm" id="btn-reset">🗑 Nollaa kaikki</button>
+  </div>
+</aside>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+
+  <!-- PARITUKSET -->
+  <div id="page-pairings" class="page active">
+    <div class="page-hdr">
+      <h2>Paritukset</h2>
+      <span class="sub" id="pairings-sub"></span>
+    </div>
+    <div class="stat-bar">
+      <div class="stat-item"><div class="stat-v" id="st-players">0</div><div class="stat-l">Pelaajat</div></div>
+      <div class="stat-item"><div class="stat-v" id="st-rounds">0</div><div class="stat-l">Kierrokset</div></div>
+      <div class="stat-item"><div class="stat-v" id="st-boards">0</div><div class="stat-l">Laudat</div></div>
+      <div class="stat-item"><div class="stat-v" id="st-done">0</div><div class="stat-l">Tulokset</div></div>
+    </div>
+    <div class="round-tabs" id="round-tabs"></div>
+    <div id="pairings-body">
+      <div class="msg">Lisää pelaajat Pelaajat-välilehdeltä ja luo paritukset vasemmalta.</div>
+    </div>
+  </div>
+
+  <!-- SIJOITUKSET -->
+  <div id="page-standings" class="page">
+    <div class="page-hdr"><h2>Sijoitukset</h2></div>
+    <div id="standings-body">
+      <div class="msg">Ei pelaajia.</div>
+    </div>
+  </div>
+
+  <!-- KOHTAAMISET -->
+  <div id="page-cross" class="page">
+    <div class="page-hdr"><h2>Kohtaamiset</h2></div>
+    <div id="cross-body">
+      <div class="msg">Ei tuloksia.</div>
+    </div>
+  </div>
+
+  <!-- PELAAJAT -->
+  <div id="page-players" class="page">
+    <div class="page-hdr"><h2>Pelaajat</h2></div>
+
+    <div style="margin-bottom:20px;padding:16px;border:1px solid var(--border);background:white">
+      <div class="s-label" style="margin-bottom:8px">Tuo pelaajat (Swiss-Manager tai yksinkertainen lista)</div>
+      <textarea id="import-text" placeholder="001 Virtanen Vesa             2340  HSS&#10;002 Korhonen Kimmo            2210  TuSS&#10;&#10;tai yksinkertaisesti:&#10;Virtanen Vesa 2340&#10;Korhonen Kimmo"></textarea>
+      <div class="hint">
+        Tuetut formaatit:<br>
+        Swiss-Manager: <code>001 Sukunimi Etunimi    2150  FIN</code><br>
+        Yksinkertainen: <code>Etunimi Sukunimi 2150</code> tai <code>Etunimi Sukunimi</code>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-green" id="btn-import">Tuo pelaajat</button>
+        <button class="btn btn-ghost btn-sm" id="btn-example">Esimerkki</button>
+      </div>
+      <div id="import-msg"></div>
+    </div>
+
+    <div style="padding:16px;border:1px solid var(--border);background:white">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="s-label" style="margin-bottom:0">Pelaajat (<span id="player-count">0</span>)</div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" id="btn-add-player">+ Lisää</button>
+          <button class="btn btn-red btn-sm" id="btn-clear-players">Tyhjennä</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nimi</th>
+            <th>Rating</th>
+            <th>Seura</th>
+            <th>Ryhmä</th>
+            <th>Tila</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="player-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ASETUKSET -->
+  <div id="page-settings" class="page">
+    <div class="page-hdr"><h2>Tietoja</h2></div>
+    <div class="msg">
+      Shakkiturnausohjelma — Swiss-järjestelmä<br><br>
+      • Paritukset tehdään pisteiden mukaan järjestettyihin ryhmiin<br>
+      • Väritasapaino seurataan ja pyritään tasaamaan<br>
+      • Uusintaotteluita vältetään<br>
+      • Tiebreak: Buchholz → Sonneborn-Berger<br>
+      • Varmuuskopio: JSON-tiedosto<br>
+      • Automaattitallennus: selaimen localStorage
+    </div>
+  </div>
+
+</div><!-- .content -->
+</main>
+</div><!-- #app -->
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3 id="modal-title"></h3>
+    <p id="modal-msg"></p>
+    <div class="btn-row">
+      <button class="btn btn-red" id="modal-ok">Vahvista</button>
+      <button class="btn btn-ghost" id="modal-cancel">Peruuta</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// STATE — single source of truth
+// ═══════════════════════════════════════════════════════
+const S = {
+  players: [],   // { id:int, name:str, rating:int, club:str, active:bool, group:str }
+  rounds:  [],   // [ { pairs: [ {wId, bId, res} ] } ]
+  view:    0,    // currently displayed round index (0-based)
+  cfg: { name:'Shakkiturnaus', rounds:7, bye:0.5 }
+};
+
+let _nextId = 1;
+function freshId() { return _nextId++; }
+
+// ═══════════════════════════════════════════════════════
+// SCORE ENGINE — pure functions, no side effects
+// ═══════════════════════════════════════════════════════
+
+// Returns { [playerId]: score }
+function calcScores() {
+  const sc = {};
+  S.players.forEach(p => { sc[p.id] = 0; });
+
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null) {
+        // BYE
+        if (pair.res === '1') sc[pair.wId] = (sc[pair.wId] || 0) + S.cfg.bye;
+      } else {
+        if (pair.res === '1') {
+          sc[pair.wId] = (sc[pair.wId] || 0) + 1;
+        } else if (pair.res === '0') {
+          sc[pair.bId] = (sc[pair.bId] || 0) + 1;
+        } else if (pair.res === 'D') {
+          sc[pair.wId] = (sc[pair.wId] || 0) + 0.5;
+          sc[pair.bId] = (sc[pair.bId] || 0) + 0.5;
+        }
+      }
+    });
+  });
+  return sc;
+}
+
+// Returns { [playerId]: buchholzScore }
+function calcBuchholz(sc) {
+  const bh = {};
+  S.players.forEach(p => { bh[p.id] = 0; });
+
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null) return; // bye ignored in BH (or add bye score)
+      if (pair.res == null) return;
+      bh[pair.wId] = (bh[pair.wId] || 0) + (sc[pair.bId] || 0);
+      bh[pair.bId] = (bh[pair.bId] || 0) + (sc[pair.wId] || 0);
+    });
+  });
+  return bh;
+}
+
+// Returns { [playerId]: sonnebornBerger }
+function calcSB(sc) {
+  const sb = {};
+  S.players.forEach(p => { sb[p.id] = 0; });
+
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null || pair.res == null) return;
+      if (pair.res === '1') {
+        sb[pair.wId] = (sb[pair.wId] || 0) + (sc[pair.bId] || 0);
+      } else if (pair.res === '0') {
+        sb[pair.bId] = (sb[pair.bId] || 0) + (sc[pair.wId] || 0);
+      } else if (pair.res === 'D') {
+        sb[pair.wId] = (sb[pair.wId] || 0) + 0.5 * (sc[pair.bId] || 0);
+        sb[pair.bId] = (sb[pair.bId] || 0) + 0.5 * (sc[pair.wId] || 0);
+      }
+    });
+  });
+  return sb;
+}
+
+// Returns { [playerId]: colorBalance }  positive = more whites
+function calcColors() {
+  const col = {};
+  S.players.forEach(p => { col[p.id] = 0; });
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null) return;
+      col[pair.wId] = (col[pair.wId] || 0) + 1;
+      col[pair.bId] = (col[pair.bId] || 0) - 1;
+    });
+  });
+  return col;
+}
+
+// Returns { [playerId]: Set of opponent ids }
+function calcOpponents() {
+  const opp = {};
+  S.players.forEach(p => { opp[p.id] = new Set(); });
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null) return;
+      opp[pair.wId].add(pair.bId);
+      opp[pair.bId].add(pair.wId);
+    });
+  });
+  return opp;
+}
+
+// Returns { [playerId]: byeCount }
+function calcByes() {
+  const b = {};
+  S.players.forEach(p => { b[p.id] = 0; });
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null) b[pair.wId] = (b[pair.wId] || 0) + 1;
+    });
+  });
+  return b;
+}
+
+// Laskee uudet ELO-luvut (K-kerroin 20)
+function calcElo() {
+  const elo = {};
+  S.players.forEach(p => { elo[p.id] = p.rating || 0; });
+
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null || pair.res === null) return;
+      
+      const w = pair.wId, b = pair.bId;
+      const Rw = elo[w], Rb = elo[b];
+      
+      const Ew = 1 / (1 + Math.pow(10, (Rb - Rw) / 400));
+      const Eb = 1 / (1 + Math.pow(10, (Rw - Rb) / 400));
+      
+      let Sw = 0.5, Sb = 0.5;
+      if (pair.res === '1') { Sw = 1; Sb = 0; }
+      if (pair.res === '0') { Sw = 0; Sb = 1; }
+      
+      elo[w] = Math.round(Rw + 20 * (Sw - Ew));
+      elo[b] = Math.round(Rb + 20 * (Sb - Eb));
+    });
+  });
+  return elo;
+}
+
+function createRound() {
+  const active = S.players.filter(p => p.active);
+  if (active.length < 2) return alert('Tarvitaan vähintään 2 pelaajaa.');
+
+  const sc = calcScores(), col = calcColors(), opp = calcOpponents(), byes = calcByes();
+
+  // Ryhmitellään pelaajat turnausryhmän mukaan (A, B, C, ... tai tyhjä = yksi ryhmä)
+  const groupNames = [...new Set(active.map(p => p.group || ''))].sort();
+
+  const allPairs = [];
+  const usedGlobally = new Set();
+
+  for (const grp of groupNames) {
+    const grpPlayers = active.filter(p => (p.group || '') === grp);
+    if (grpPlayers.length === 0) continue;
+
+    // 1. Lajittelu: Pisteet, sitten Rating
+    const sorted = [...grpPlayers].sort((a, b) => (sc[b.id]||0) - (sc[a.id]||0) || (b.rating||0) - (a.rating||0));
+
+    const used = new Set();
+
+    // BYE ryhmän sisällä jos pariton määrä
+    if (sorted.length % 2 === 1) {
+      let byeTarget = sorted.slice().reverse().find(p => !byes[p.id]) || sorted[sorted.length - 1];
+      allPairs.push({ wId: byeTarget.id, bId: null, res: '1', group: grp });
+      used.add(byeTarget.id);
+      usedGlobally.add(byeTarget.id);
+    }
+
+    const remaining = sorted.filter(p => !used.has(p.id));
+
+    // Swiss-puolitus ryhmän sisällä
+    const scoreGroups = {};
+    remaining.forEach(p => {
+      const s = sc[p.id] || 0;
+      if (!scoreGroups[s]) scoreGroups[s] = [];
+      scoreGroups[s].push(p);
+    });
+
+    let swissSortedList = [];
+    const sortedScores = Object.keys(scoreGroups).map(Number).sort((a, b) => b - a);
+    sortedScores.forEach(score => {
+      const group = scoreGroups[score];
+      const mid = Math.ceil(group.length / 2);
+      const top = group.slice(0, mid);
+      const bottom = group.slice(mid);
+      for (let i = 0; i < mid; i++) {
+        if (top[i]) swissSortedList.push(top[i]);
+        if (bottom[i]) swissSortedList.push(bottom[i]);
+      }
+    });
+
+    function tryPair(list, allowRematch) {
+      if (list.length === 0) return [];
+      const p1 = list[0];
+      const options = list.slice(1);
+      for (let i = 0; i < options.length; i++) {
+        const p2 = options[i];
+        if (!allowRematch && opp[p1.id].has(p2.id)) continue;
+        let w = p1, b = p2;
+        if (S.rounds.length === 0) {
+          const p1Index = grpPlayers.findIndex(p => p.id === p1.id);
+          if (p1Index % 2 === 1) { [w, b] = [p2, p1]; }
+        } else {
+          if ((col[p1.id]||0) > (col[p2.id]||0)) { [w, b] = [p2, p1]; }
+          else if ((col[p1.id]||0) === (col[p2.id]||0) && (p1.rating||0) < (p2.rating||0)) { [w, b] = [p2, p1]; }
+        }
+        const res = tryPair(options.filter(p => p.id !== p2.id), allowRematch);
+        if (res !== null) return [{ wId: w.id, bId: b.id, res: null, group: grp }, ...res];
+      }
+      return null;
+    }
+
+    const result = tryPair(swissSortedList, false) || tryPair(swissSortedList, true);
+    if (result) {
+      result.forEach(p => allPairs.push(p));
+    } else {
+      alert(`Paritus epäonnistui ryhmässä ${grp || '(ei ryhmää)'}!`);
+      return;
+    }
+  }
+
+  S.rounds.push({ pairs: allPairs });
+  S.view = S.rounds.length - 1;
+  render();
+}
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function fmtScore(n) {
+  if (n == null) return '—';
+  if (n === Math.floor(n)) return String(n);
+  // n is x.5
+  const whole = Math.floor(n);
+  return whole === 0 ? '½' : whole + '½';
+}
+
+function playerById(id) {
+  return S.players.find(p => p.id === id) || null;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  renderSidebar();
+  const active = document.querySelector('.tab.active')?.dataset.page || 'pairings';
+  if (active === 'pairings')   renderPairings();
+  if (active === 'standings')  renderStandings();
+  if (active === 'cross')      renderCross();
+  if (active === 'players')    renderPlayers();
+}
+
+function renderSidebar() {
+  const R = S.rounds.length;
+  const maxR = S.cfg.rounds;
+  const info = document.getElementById('sidebar-round-info');
+
+  if (R === 0) {
+    info.textContent = 'Pelaajia: ' + S.players.filter(p=>p.active).length;
+  } else {
+    const lastRnd = S.rounds[R-1];
+    const done = lastRnd.pairs.filter(p => p.res !== null).length;
+    const total = lastRnd.pairs.length;
+    info.textContent = `Kierros ${R}/${maxR} — ${done}/${total} tulosta`;
+  }
+
+  // Buttons
+  const btnNew = document.getElementById('btn-new-round');
+  const delWrap = document.getElementById('btn-delete-round-wrap');
+
+  if (R >= maxR) {
+    btnNew.textContent = '✓ Turnaus valmis';
+    btnNew.disabled = true;
+    btnNew.className = 'btn btn-sm';
+  } else {
+    btnNew.textContent = R === 0 ? '▶ Aloita kierros 1' : `▶ Kierros ${R+1}`;
+    btnNew.disabled = false;
+    btnNew.className = 'btn btn-green';
+  }
+
+  delWrap.style.display = R > 0 ? 'block' : 'none';
+
+  // Stats
+  document.getElementById('st-players').textContent = S.players.filter(p=>p.active).length;
+  document.getElementById('st-rounds').textContent  = R;
+  const lastRnd = S.rounds[S.view];
+  document.getElementById('st-boards').textContent  = lastRnd ? lastRnd.pairs.filter(p=>p.bId!==null).length : 0;
+  document.getElementById('st-done').textContent    = lastRnd ? lastRnd.pairs.filter(p=>p.res!==null).length : 0;
+}
+
+function renderPairings() {
+  const R = S.rounds.length;
+  const sub = document.getElementById('pairings-sub');
+  sub.textContent = R === 0 ? '' : `Kierros ${S.view+1} / ${S.cfg.rounds}`;
+
+  const elos = calcElo(); // Lasketaan turnauksen aikaiset Elo-luvut
+
+  const tabsEl = document.getElementById('round-tabs');
+  tabsEl.innerHTML = S.rounds.map((_, i) =>
+    `<button class="rtab${i===S.view?' active':''}" onclick="switchView(${i})">K${i+1}</button>`
+  ).join('');
+
+  const body = document.getElementById('pairings-body');
+
+  if (R === 0) {
+    body.innerHTML = '<div class="msg">Ei parituksia. Lisää pelaajat ja luo kierros vasemmalta.</div>';
+    return;
+  }
+
+  const rnd = S.rounds[S.view];
+  let html = '';
+
+  // Ryhmitellään parit ryhmän mukaan
+  const pairsByGroup = {};
+  rnd.pairs.forEach((pair, idx) => {
+    const grp = pair.group !== undefined ? pair.group : '';
+    if (!pairsByGroup[grp]) pairsByGroup[grp] = [];
+    pairsByGroup[grp].push({ pair, idx });
+  });
+
+  const grpKeys = Object.keys(pairsByGroup).sort();
+  const hasGroups = grpKeys.some(g => g !== '');
+
+  grpKeys.forEach(grp => {
+    if (hasGroups) {
+      html += `<div class="group-hdr"><span class="group-badge">${grp || '?'}</span> Ryhmä ${grp || '?'}</div>`;
+    }
+    html += '<div class="pairing-board">';
+    let boardN = 1;
+    pairsByGroup[grp].forEach(({ pair, idx }) => {
+      if (pair.bId === null) {
+        const p = playerById(pair.wId);
+        html += `<div class="bye-row">
+          <span style="font-size:11px;color:var(--muted)">${boardN++}.</span>
+          <span class="player-name">${p ? p.name : '?'}</span>
+          <span style="font-size:11px;color:var(--muted)">${p?.rating||''} (${elos[pair.wId]})</span>
+          <span class="bye-tag">BYE +${fmtScore(S.cfg.bye)}</span>
+        </div>`;
+        return;
+      }
+
+      const w = playerById(pair.wId);
+      const b = playerById(pair.bId);
+      const r = pair.res;
+
+      html += `<div class="pairing-row">
+        <div class="board-n">${boardN++}</div>
+        <div class="player-cell right">
+          <span class="player-rtg">${w?.rating||''} (${elos[w.id]})</span>
+          <span class="player-name">${w?.name||'?'}</span>
+          <span class="color-pip white-pip"></span>
+        </div>
+        <div class="vs-cell">vs</div>
+        <div class="player-cell">
+          <span class="color-pip black-pip"></span>
+          <span class="player-name">${b?.name||'?'}</span>
+          <span class="player-rtg">${b?.rating||''} (${elos[b.id]})</span>
+        </div>
+        <div class="result-btns">
+          <button class="rbtn${r==='1'?' sel-w':''}" onclick="setRes(${S.view},${idx},'1')" title="Valkoinen voittaa">1–0</button>
+          <button class="rbtn${r==='D'?' sel-d':''}" onclick="setRes(${S.view},${idx},'D')" title="Tasapeli">½–½</button>
+          <button class="rbtn${r==='0'?' sel-l':''}" onclick="setRes(${S.view},${idx},'0')" title="Musta voittaa">0–1</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  body.innerHTML = html;
+}
+function switchView(i) {
+  S.view = i;
+  renderPairings();
+  renderSidebar();
+}
+
+function setRes(roundIdx, pairIdx, res) {
+  const pair = S.rounds[roundIdx].pairs[pairIdx];
+  pair.res = pair.res === res ? null : res; // toggle off if same
+  autoSave();
+  renderPairings();
+  renderSidebar();
+}
+
+// ── STANDINGS PAGE ──
+function renderStandings() {
+  const sc = calcScores();
+  const bh = calcBuchholz(sc);
+  const sb = calcSB(sc);
+  const elos = calcElo();
+
+  const activePlayers = S.players.filter(p => p.active);
+
+  if (activePlayers.length === 0) {
+    document.getElementById('standings-body').innerHTML = '<div class="msg">Ei pelaajia.</div>';
+    return;
+  }
+
+  // Build history per player
+  function playerHistory(pid) {
+    return S.rounds.map(rnd => {
+      const pair = rnd.pairs.find(p => p.wId === pid || p.bId === pid);
+      if (!pair) return '<span class="hc u">·</span>';
+      if (pair.bId === null) return '<span class="hc B">B</span>';
+      if (pair.res == null) return '<span class="hc u">?</span>';
+      const isWhite = pair.wId === pid;
+      if (pair.res === 'D') return '<span class="hc D">T</span>';
+      const won = (isWhite && pair.res === '1') || (!isWhite && pair.res === '0');
+      return `<span class="hc ${won?'W':'L'}">${won?'V':'H'}</span>`;
+    }).join('');
+  }
+
+  // Ryhmitellään pelaajat turnausryhmän mukaan
+  const groupNames = [...new Set(activePlayers.map(p => p.group || ''))].sort();
+  const hasGroups = groupNames.some(g => g !== '');
+
+  let html = '';
+
+  groupNames.forEach(grp => {
+    const grpPlayers = activePlayers
+      .filter(p => (p.group || '') === grp)
+      .sort((a, b) => {
+        const ds = (sc[b.id]||0) - (sc[a.id]||0);
+        if (Math.abs(ds) > 0.001) return ds;
+        const db = (bh[b.id]||0) - (bh[a.id]||0);
+        if (Math.abs(db) > 0.001) return db;
+        return (sb[b.id]||0) - (sb[a.id]||0);
+      });
+
+    if (hasGroups) {
+      html += `<div class="group-hdr" style="margin-top:${grp === groupNames[0] ? 0 : 20}px"><span class="group-badge">${grp || '?'}</span> Ryhmä ${grp || '?'}</div>`;
+    }
+
+    html += '<table><thead><tr><th>#</th><th>Nimi</th><th>Rating</th><th>Pisteet</th><th>BH</th><th>SB</th><th>Historia</th></tr></thead><tbody>';
+    grpPlayers.forEach((p, i) => {
+      html += `<tr>
+        <td class="td-num">${i+1}</td>
+        <td class="td-name">${p.name}</td>
+        <td class="td-rating">${p.rating||'—'} (${elos[p.id]})</td>
+        <td class="td-score">${fmtScore(sc[p.id]||0)}</td>
+        <td class="td-muted">${fmtScore(bh[p.id]||0)}</td>
+        <td class="td-muted">${fmtScore(sb[p.id]||0)}</td>
+        <td><div class="hist">${playerHistory(p.id)}</div></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+  });
+
+  document.getElementById('standings-body').innerHTML = html;
+}
+
+// ── CROSS TABLE ──
+function renderCross() {
+  const sc = calcScores();
+  const sorted = S.players.filter(p => p.active).sort((a, b) => (sc[b.id]||0) - (sc[a.id]||0));
+
+  if (sorted.length === 0) {
+    document.getElementById('cross-body').innerHTML = '<div class="msg">Ei pelaajia.</div>';
+    return;
+  }
+
+  // Build result lookup: res[pid1][pid2] = result from pid1's perspective
+  const res = {};
+  sorted.forEach(p => { res[p.id] = {}; });
+
+  S.rounds.forEach(rnd => {
+    rnd.pairs.forEach(pair => {
+      if (pair.bId === null || pair.res == null) return;
+      const w = pair.wId, b = pair.bId;
+      if (pair.res === '1') { res[w][b] = '1'; res[b][w] = '0'; }
+      else if (pair.res === '0') { res[w][b] = '0'; res[b][w] = '1'; }
+      else { res[w][b] = 'D'; res[b][w] = 'D'; }
+    });
+  });
+
+  let html = '<div class="cross-wrap"><table><thead><tr><th>#</th><th>Nimi</th>';
+  sorted.forEach((_, i) => { html += `<th>${i+1}</th>`; });
+  html += '<th>Pist.</th></tr></thead><tbody>';
+
+  sorted.forEach((p, i) => {
+    html += `<tr><td class="td-num">${i+1}</td><td class="td-name">${p.name}</td>`;
+    sorted.forEach(opp => {
+      if (opp.id === p.id) {
+        html += '<td class="self-cell">×</td>';
+      } else {
+        const r = res[p.id]?.[opp.id];
+        if (r == null) {
+          html += '<td class="td-muted">—</td>';
+        } else {
+          const cls = r==='1'?'cr-w':r==='0'?'cr-l':'cr-d';
+          const lbl = r==='1'?'1':r==='0'?'0':'½';
+          html += `<td class="${cls}">${lbl}</td>`;
+        }
+      }
+    });
+    html += `<td class="td-score">${fmtScore(sc[p.id]||0)}</td></tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('cross-body').innerHTML = html;
+}
+
+// ── PLAYERS PAGE ──
+function renderPlayers() {
+  const elos = calcElo(); // Lisää tämä funktion alkuun
+  const active = S.players.filter(p => p.active);
+  document.getElementById('player-count').textContent = active.length;
+
+  const tbody = document.getElementById('player-tbody');
+  if (S.players.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="td-muted" style="text-align:center;padding:20px">Ei pelaajia. Tuo pelaajat yllä olevalla lomakkeella.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = S.players.map((p, i) => `
+    <tr style="opacity:${p.active?1:0.45}">
+      <td class="td-num">${i+1}</td>
+      <td class="td-name">${p.name}</td>
+      <td class="td-rating">${p.rating||'—'} (${elos[p.id]})</td>
+      <td class="td-muted">${p.club||''}</td>
+      <td><input class="s-field input group-input" type="text" maxlength="3" value="${p.group||''}" placeholder="—" title="Ryhmä (esim. A, B, C)" onchange="setGroup(${p.id},this.value)" style="width:40px;text-align:center;text-transform:uppercase;padding:2px 4px;font-size:11px;border:1px solid var(--border);background:white;font-family:'JetBrains Mono',monospace"></td>
+      <td class="td-muted">${p.active?'Aktiivinen':'Ei pelaa'}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="toggleActive(${p.id})">${p.active?'Poista':'Aktivoi'}</button>
+          ${S.rounds.length===0 ? `<button class="btn btn-red btn-sm" onclick="removePlayer(${p.id})">✕</button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// PLAYER MANAGEMENT
+// ═══════════════════════════════════════════════════════
+function setGroup(id, val) {
+  const p = S.players.find(p => p.id === id);
+  if (p) p.group = val.trim().toUpperCase();
+  autoSave();
+}
+
+function toggleActive(id) {
+  const p = S.players.find(p => p.id === id);
+  if (p) p.active = !p.active;
+  autoSave();
+  render();
+}
+
+function removePlayer(id) {
+  S.players = S.players.filter(p => p.id !== id);
+  autoSave();
+  render();
+}
+
+function importPlayers() {
+  const text = document.getElementById('import-text').value.trim();
+  if (!text) return;
+
+  let count = 0;
+  const lines = text.split('\n');
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+
+    let name = '', rating = 0, club = '';
+
+    // Swiss-Manager: "001 Lastname Firstname    2150  FIN"
+    // Number at start, then name, then rating, optional club
+    const smMatch = line.match(/^\d+\s+(.+?)\s{2,}(\d{3,4})(?:\s+(\S+))?/);
+    if (smMatch) {
+      name   = smMatch[1].trim();
+      rating = parseInt(smMatch[2], 10) || 0;
+      club   = smMatch[3] || '';
+    } else {
+      // Simple: last token is rating if 3-4 digits, rest is name
+      const parts = line.split(/\s+/);
+      const last  = parts[parts.length - 1];
+      if (/^\d{3,4}$/.test(last)) {
+        rating = parseInt(last, 10);
+        name   = parts.slice(0, -1).join(' ');
+      } else {
+        name = line;
+      }
+    }
+
+    name = name.trim();
+    if (!name) continue;
+
+    S.players.push({ id: freshId(), name, rating, club, active: true, group: '' });
+    count++;
+  }
+
+  document.getElementById('import-text').value = '';
+  const msg = document.getElementById('import-msg');
+  if (count > 0) {
+    msg.innerHTML = `<div class="msg ok" style="margin-top:8px">✓ Tuotiin ${count} pelaajaa.</div>`;
+    setTimeout(() => { msg.innerHTML = ''; }, 3000);
+  } else {
+    msg.innerHTML = `<div class="msg err" style="margin-top:8px">Ei tunnistettuja pelaajia.</div>`;
+  }
+
+  autoSave();
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// BACKUP
+// ═══════════════════════════════════════════════════════
+function saveBackup() {
+  const data = JSON.stringify({ v:2, players:S.players, rounds:S.rounds, cfg:S.cfg, nextId:_nextId }, null, 2);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], {type:'application/json'}));
+  a.download = (S.cfg.name||'turnaus').replace(/[^a-z0-9äöå]/gi,'_') + '_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function loadBackupFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (!Array.isArray(d.players)) throw new Error('Virheellinen tiedosto');
+      S.players = d.players;
+      S.rounds  = d.rounds || [];
+      S.cfg     = d.cfg || S.cfg;
+      S.view    = Math.max(0, S.rounds.length - 1);
+      _nextId   = d.nextId || (Math.max(0, ...S.players.map(p=>p.id)) + 1);
+      syncCfgFields();
+      autoSave();
+      render();
+      alert(`✓ Ladattu: ${S.players.length} pelaajaa, ${S.rounds.length} kierrosta.`);
+    } catch(err) {
+      alert('Virhe latauksessa: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function autoSave() {
+  try {
+    localStorage.setItem('shakkiTurnaus_v2', JSON.stringify({ v:2, players:S.players, rounds:S.rounds, cfg:S.cfg, nextId:_nextId }));
+  } catch(_) {}
+}
+
+function loadAutoSave() {
+  try {
+    const raw = localStorage.getItem('shakkiTurnaus_v2');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (!Array.isArray(d.players)) return;
+    S.players = d.players;
+    S.rounds  = d.rounds || [];
+    S.cfg     = d.cfg || S.cfg;
+    S.view    = Math.max(0, S.rounds.length - 1);
+    _nextId   = d.nextId || (Math.max(0, ...S.players.map(p=>p.id)) + 1);
+    syncCfgFields();
+  } catch(_) {}
+}
+
+function syncCfgFields() {
+  document.getElementById('cfg-name').value   = S.cfg.name;
+  document.getElementById('cfg-rounds').value = S.cfg.rounds;
+  document.getElementById('cfg-bye').value    = S.cfg.bye;
+}
+
+function readCfgFields() {
+  S.cfg.name   = document.getElementById('cfg-name').value.trim() || 'Shakkiturnaus';
+  S.cfg.rounds = parseInt(document.getElementById('cfg-rounds').value, 10) || 7;
+  S.cfg.bye    = parseFloat(document.getElementById('cfg-bye').value);
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+let _modalCb = null;
+function showModal(title, msg, cb) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-msg').textContent   = msg;
+  document.getElementById('modal-bg').classList.add('open');
+  _modalCb = cb;
+}
+document.getElementById('modal-ok').addEventListener('click', () => {
+  document.getElementById('modal-bg').classList.remove('open');
+  if (_modalCb) { _modalCb(); _modalCb = null; }
+});
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-bg').classList.remove('open');
+  _modalCb = null;
+});
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    render();
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// EVENT WIRING
+// ═══════════════════════════════════════════════════════
+document.getElementById('btn-new-round').addEventListener('click', () => {
+  readCfgFields();
+  if (S.rounds.length > 0) {
+    const last = S.rounds[S.rounds.length - 1];
+    const missing = last.pairs.filter(p => p.res === null).length;
+    if (missing > 0) {
+      showModal('Puuttuvia tuloksia',
+        `Kierroksella ${S.rounds.length} on ${missing} syöttämätöntä tulosta. Luodaanko uusi kierros silti?`,
+        () => { createRound(); showPage('pairings'); }
+      );
+      return;
+    }
+  }
+  createRound();
+  showPage('pairings');
+});
+
+function showPage(id) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab[data-page="${id}"]`).classList.add('active');
+  document.getElementById('page-' + id).classList.add('active');
+  render();
+}
+
+document.getElementById('btn-delete-round').addEventListener('click', () => {
+  const n = S.rounds.length;
+  showModal('Poista kierros ' + n,
+    `Poistetaanko kierros ${n} ja kaikki sen tulokset?`,
+    () => {
+      S.rounds.pop();
+      S.view = Math.max(0, S.rounds.length - 1);
+      autoSave();
+      render();
+    }
+  );
+});
+
+document.getElementById('btn-save').addEventListener('click', () => { readCfgFields(); saveBackup(); });
+document.getElementById('btn-load').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', loadBackupFile);
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  showModal('Nollaa kaikki', 'Poistetaan kaikki pelaajat, kierrokset ja tulokset. Tätä ei voi peruuttaa.', () => {
+    S.players = []; S.rounds = []; S.view = 0; _nextId = 1;
+    localStorage.removeItem('shakkiTurnaus_v2');
+    render();
+  });
+});
+
+document.getElementById('btn-import').addEventListener('click', importPlayers);
+
+document.getElementById('btn-example').addEventListener('click', () => {
+  document.getElementById('import-text').value =
+`001 Virtanen Vesa             2340  HSS
+002 Korhonen Kimmo            2210  TuSS
+003 Mäkinen Marko             2180  OShK
+004 Heikkinen Helena          2050  HSS
+005 Leinonen Laura            1980  TuSS
+006 Mäkelä Mikael             1920  HeSS
+007 Järvinen Jari             1870  OShK
+008 Nieminen Niina            1820  HSS
+009 Kärkkäinen Katri          1760  TuSS
+010 Räsänen Riku              1700  HeSS
+011 Hämäläinen Henna          1650  HSS
+012 Lehto Lauri               1580  OShK
+013 Ojala Otto                1520  TuSS
+014 Saarinen Saara            1460  HSS
+015 Peltola Petri             1400  ESS`;
+});
+
+document.getElementById('btn-add-player').addEventListener('click', () => {
+  const name   = prompt('Nimi:');
+  if (!name?.trim()) return;
+  const rstr   = prompt('Rating (0 = ei ratingia):', '0');
+  const rating = parseInt(rstr, 10) || 0;
+  const club   = prompt('Seura (valinnainen):', '') || '';
+  S.players.push({ id: freshId(), name: name.trim(), rating, club, active: true, group: '' });
+  autoSave();
+  render();
+});
+
+document.getElementById('btn-clear-players').addEventListener('click', () => {
+  showModal('Tyhjennä pelaajat', 'Poistetaan kaikki pelaajat ja tulokset?', () => {
+    S.players = []; S.rounds = []; S.view = 0; _nextId = 1;
+    autoSave(); render();
+  });
+});
+
+['cfg-name','cfg-rounds','cfg-bye'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => { readCfgFields(); autoSave(); renderSidebar(); });
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+loadAutoSave();
+render();
+</script>
+</body>
+</html>
