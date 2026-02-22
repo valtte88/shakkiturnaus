@@ -1,3 +1,7 @@
+#Shakkiturnaus
+
+Vaihtoehto Swiss-manager ohjelmalle 1-N ryhmän sveitsiläiseen ja/tai round-robin turnaukseen. Mahdollisesti myös vahvuuslukulaskentaa samaan.
+
 v1..v3: Tehty Claude 4.6:lla lyhuellä promptilla. Korjattu paritusalgoritmia Gemini 3.1:llä.
 ...v7: Lisäilty ominaisuuksia Claude 4.6
 
