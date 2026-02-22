@@ -5,7 +5,7 @@ Vaihtoehto Swiss-manager ohjelmalle 1-N ryhmän sveitsiläiseen ja/tai round-rob
 v1..v3: Tehty Claude 4.6:lla lyhyellä promptilla. Korjattu paritusalgoritmia Gemini 3.1:llä.
 ...v7: Lisäilty ominaisuuksia Claude 4.6
 
-Ei taida sisältää ollenkaan käsin kirjoitettua koodia (v3 ja v7). Prompteja yms. saattaa olla jossain tallessa. Ainakin Gemini perusteli paritusalgoritmia yksityiskohtaisesti, mutta en perehtynyt.
+Ei taida sisältää ollenkaan käsinkirjoitettua koodia (v3 ja v7). Prompteja yms. saattaa olla jossain tallessa. Ainakin Gemini perusteli paritusalgoritmia yksityiskohtaisesti, mutta en perehtynyt.
 
 Jatko:
 
